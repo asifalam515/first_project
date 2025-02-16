@@ -1,18 +1,6 @@
 // schema and model will be here
 import { Schema, model, connect } from "mongoose";
-import {
-  Guardian,
-  localGurdian,
-  Student,
-  Student,
-  UserName,
-} from "./student.interface";
-// import {
-//   Guardian,
-//   localGurdian,
-//   Student,
-//   UserName,
-// } from "./student/student.interface";
+import { Guardian, localGurdian, Student, UserName } from "./student.interface";
 
 const userNameSchema = new Schema<UserName>({
   firstName: {
@@ -70,4 +58,4 @@ const studentSchema = new Schema<Student>({
   profileImg: String,
   isActive: ["ACTIVE", "BLOCKED"],
 });
-const Student = model<Student>("Student", studentSchema);
+export const StudentModel = model<Student>("Student", studentSchema);
