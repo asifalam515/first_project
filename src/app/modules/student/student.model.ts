@@ -1,11 +1,23 @@
 // schema and model will be here
 import { Schema, model, connect } from "mongoose";
 import { Guardian, localGurdian, Student, UserName } from "./student.interface";
+import validator from "validator";
 
 const userNameSchema = new Schema<UserName>({
   firstName: {
     type: String,
-    require: true,
+    require: [true, "first name is required"],
+    trim: true,
+    maxlength: [20, "max allowed length is 20 char"],
+    validate: {
+      validator: function (value: string) {
+        // console.log(value); we will get firstName's value
+        const firstNameStr =
+          value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        return firstNameStr === value;
+      },
+      message: "{VALUE} is not in capitialize format",
+    },
   },
   middleName: {
     type: String,
@@ -14,6 +26,10 @@ const userNameSchema = new Schema<UserName>({
   lastName: {
     type: String,
     require: true,
+    validate: {
+      validator: (value: string) => validator.isAlpha(value),
+      message: "{VALUE} is not valid",
+    },
   },
 });
 
