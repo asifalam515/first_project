@@ -1,6 +1,11 @@
 // schema and model will be here
 import { Schema, model, connect } from "mongoose";
-import { Guardian, localGurdian, Student, UserName } from "./student.interface";
+import {
+  Guardian,
+  LocalGuardian,
+  Student,
+  UserName,
+} from "./student.interface";
 import validator from "validator";
 
 const userNameSchema = new Schema<UserName>({
@@ -41,7 +46,7 @@ const guardianSchema = new Schema<Guardian>({
   motherOccupation: String,
   motherContactNo: String,
 });
-const localGurdianSchema = new Schema<localGurdian>({
+const localGuardianSchema = new Schema<LocalGuardian>({
   name: String,
   occupation: String,
   contactNo: String,
@@ -80,13 +85,13 @@ const studentSchema = new Schema<Student>({
     enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
   },
   presentAddress: { type: String, required: true },
-  pernamentAddress: { type: String, required: true },
-  gurdian: {
+  permanentAddress: { type: String, required: true },
+  guardian: {
     type: guardianSchema,
     required: [true, "gurdian is required"],
   },
-  localGurdian: {
-    type: localGurdianSchema,
+  localGuardian: {
+    type: localGuardianSchema,
     required: [true, "local gurdian is required"],
   },
 
