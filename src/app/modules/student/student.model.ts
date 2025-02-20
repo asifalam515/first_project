@@ -1,5 +1,6 @@
 // schema and model will be here
 import { Schema, model, connect } from "mongoose";
+import bcrypt from "bcrypt";
 import {
   TGuardian,
   TLocalGuardian,
@@ -55,6 +56,12 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 });
 const studentSchema = new Schema<TStudent, StudentModel>({
   id: { type: String, required: true, unique: true },
+  password: {
+    type: String,
+    required: [true, "Password is Required"],
+    unique: true,
+    maxlength: [20, "Password can't be more than 20 chararcters"],
+  },
   name: {
     type: userNameSchema,
     required: [true, "name is required"],
@@ -102,6 +109,22 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     enum: ["ACTIVE", "BLOCKED"],
     default: "ACTIVE",
   },
+});
+
+// pre save middleware/hook:will work on create() save()
+studentSchema.pre("save", async function (next) {
+  const user = this;
+  // hasing password and save into db
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(process.env.BCRYPT_SALT_ROUNDS)
+  );
+  next();
+});
+
+// post save middleware/hook
+studentSchema.post("save", function () {
+  console.log(this, "post hook: we saved our data");
 });
 // creating a custom static method
 studentSchema.statics.isUserExists = async function (id: string) {

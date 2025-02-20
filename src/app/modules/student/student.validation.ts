@@ -39,6 +39,7 @@ const userNameValidationSchema = z.object({
 // Main Student schema
 export const studentValidationSchema = z.object({
   id: z.string().min(1, "ID is required"),
+  password: z.string().max(20),
   name: userNameValidationSchema,
   gender: z.enum(["Male", "Female", "Other"]),
   dateOfBirth: z.string().optional(),
