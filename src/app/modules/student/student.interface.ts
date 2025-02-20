@@ -38,6 +38,7 @@ export type TStudent = {
   localGuardian: TLocalGuardian; // Fixed typo here
   profileImg?: string;
   isActive: "ACTIVE" | "BLOCKED";
+  isDeleted: boolean;
 };
 
 // for creating static
