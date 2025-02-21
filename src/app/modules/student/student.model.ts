@@ -54,67 +54,78 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
   contactNo: String,
   address: String,
 });
-const studentSchema = new Schema<TStudent, StudentModel>({
-  id: { type: String, required: true, unique: true },
-  password: {
-    type: String,
-    required: [true, "Password is Required"],
+const studentSchema = new Schema<TStudent, StudentModel>(
+  {
+    id: { type: String, required: true, unique: true },
+    password: {
+      type: String,
+      required: [true, "Password is Required"],
 
-    maxlength: [20, "Password can't be more than 20 chararcters"],
-  },
-  name: {
-    type: userNameSchema,
-    required: [true, "name is required"],
-  },
-  gender: {
-    type: String,
-    enum: {
-      values: ["Male", "Female", "other"],
-      message: `{VALUE} is not valid options`,
+      maxlength: [20, "Password can't be more than 20 chararcters"],
     },
-    required: true,
-  },
-  dateOfBirth: {
-    type: String,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  contactNo: {
-    type: String,
-    required: true,
-  },
-  emergencyContactNo: {
-    type: String,
-  },
-  bloodGroup: {
-    type: String,
-    enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
-  },
-  presentAddress: { type: String, required: true },
-  permanentAddress: { type: String, required: true },
-  guardian: {
-    type: guardianSchema,
-    required: [true, "gurdian is required"],
-  },
-  localGuardian: {
-    type: localGuardianSchema,
-    required: [true, "local gurdian is required"],
-  },
+    name: {
+      type: userNameSchema,
+      required: [true, "name is required"],
+    },
+    gender: {
+      type: String,
+      enum: {
+        values: ["Male", "Female", "other"],
+        message: `{VALUE} is not valid options`,
+      },
+      required: true,
+    },
+    dateOfBirth: {
+      type: String,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    contactNo: {
+      type: String,
+      required: true,
+    },
+    emergencyContactNo: {
+      type: String,
+    },
+    bloodGroup: {
+      type: String,
+      enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+    },
+    presentAddress: { type: String, required: true },
+    permanentAddress: { type: String, required: true },
+    guardian: {
+      type: guardianSchema,
+      required: [true, "gurdian is required"],
+    },
+    localGuardian: {
+      type: localGuardianSchema,
+      required: [true, "local gurdian is required"],
+    },
 
-  profileImg: String,
-  isActive: {
-    type: String,
-    enum: ["ACTIVE", "BLOCKED"],
-    default: "ACTIVE",
+    profileImg: String,
+    isActive: {
+      type: String,
+      enum: ["ACTIVE", "BLOCKED"],
+      default: "ACTIVE",
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
+  {
+    toJSON: {
+      virtuals: true,
+    },
+  }
+);
+
+// virtual
+studentSchema.virtual("fullName").get(function () {
+  return this.name.firstName + this.name.middleName + this.name.middleName;
 });
-
 // pre save middleware/hook:will work on create() save()
 studentSchema.pre("save", async function (next) {
   const user = this;
@@ -126,18 +137,31 @@ studentSchema.pre("save", async function (next) {
   next();
 });
 
-// Query Middleware
-studentSchema.pre("find", function (next) {
-  //we will get current query
-
-  console.log(this);
-});
-
 // post save middleware/hook
 studentSchema.post("save", function (doc, next) {
+  //doc is the document after the save
   //after save the password will be empty string
   doc.password = "";
 
+  next();
+});
+// query middleware
+
+// Query Middleware
+studentSchema.pre("find", function (next) {
+  //we will get current query
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+studentSchema.pre("findOne", function (next) {
+  //we will get current query
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre("aggregate", function (next) {
+  //we will get current query
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
   next();
 });
 // creating a custom static method
